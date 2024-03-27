@@ -29,6 +29,8 @@ class _AuthScreenState extends State<AuthScreen> {
     final isValid = _form.currentState!.validate();
 
     if (!isValid || !_isLogin && _selectedImage == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('You must upload your image.')));
       return;
     }
 
