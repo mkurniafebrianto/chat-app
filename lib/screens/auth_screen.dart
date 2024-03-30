@@ -1,6 +1,6 @@
 import 'dart:io';
 
-import 'package:chatapp/widgets/user_image_picker._widget.dart';
+import 'package:chatapp/widgets/user_image_picker_widget.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -64,6 +64,7 @@ class _AuthScreenState extends State<AuthScreen> {
             .collection('users')
             .doc(userCredential.user!.uid)
             .set({
+          'userId': userCredential.user!.uid,
           'username': _enteredUsername,
           'email': _enteredEmail,
           'image_url': imageUrl,
@@ -111,7 +112,7 @@ class _AuthScreenState extends State<AuthScreen> {
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         if (!_isLogin)
-                          UserImagePickeWidget(
+                          UserImagePickerWidget(
                             onPickImage: (pickedImage) {
                               _selectedImage = pickedImage;
                             },

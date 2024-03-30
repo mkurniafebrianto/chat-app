@@ -1,4 +1,6 @@
+import 'package:chatapp/widgets/message_bubble_widget.dart.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 
 class ChatMessagesWidget extends StatelessWidget {
@@ -6,12 +8,14 @@ class ChatMessagesWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final autheticatedUser = FirebaseAuth.instance.currentUser!;
+
     return StreamBuilder(
         stream: FirebaseFirestore.instance
             .collection('chat')
             .orderBy(
               'createdAt',
-              descending: false,
+              descending: true,
             )
             .snapshots(),
         builder: (context, chatSnapshots) {
@@ -36,10 +40,37 @@ class ChatMessagesWidget extends StatelessWidget {
           final loadedMessage = chatSnapshots.data!.docs;
 
           return ListView.builder(
-            itemCount: loadedMessage.length,
-            itemBuilder: (context, index) => Text(
-              loadedMessage[index].data()['text'],
+            padding: const EdgeInsets.only(
+              bottom: 40,
+              left: 13,
+              right: 13,
             ),
+            reverse: true,
+            itemCount: loadedMessage.length,
+            itemBuilder: (context, index) {
+              final chatMessage = loadedMessage[index].data();
+              final nextChatMessage = index + 1 < loadedMessage.length
+                  ? loadedMessage[index + 1].data()
+                  : null;
+
+              final currentMessageUserId = chatMessage['userId'];
+              final nextMessageUserId =
+                  nextChatMessage != null ? nextChatMessage['userId'] : null;
+              final nextUserIsSame = currentMessageUserId == nextMessageUserId;
+
+              if (nextUserIsSame) {
+                return MessageBubbleWidget.next(
+                  message: chatMessage['text'],
+                  isMe: autheticatedUser.uid == currentMessageUserId,
+                );
+              } else {
+                return MessageBubbleWidget.first(
+                    userImage: chatMessage['userImage'],
+                    username: chatMessage['username'],
+                    message: chatMessage['text'],
+                    isMe: autheticatedUser.uid == currentMessageUserId);
+              }
+            },
           );
         });
   }
